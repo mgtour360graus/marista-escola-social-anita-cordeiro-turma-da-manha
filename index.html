@@ -28,10 +28,18 @@ main#inicio{grid-column:2;grid-row:1;min-width:0;min-height:0;height:100%;overfl
 .cover-image-box img{display:block;width:100%;height:100%;min-width:0;min-height:0;max-width:100%;max-height:100%;object-fit:contain;object-position:center;transform:none}
 @media(max-width:760px){.cover-page{height:100%;grid-template-rows:minmax(0,1fr)}.cover-image-box{height:100%;max-height:none}.cover-image-box img{width:100%;height:100%;min-width:0;min-height:0;max-width:100%;max-height:100%;object-fit:contain;transform:none}}
 .page { touch-action: pan-y pinch-zoom; }
+#autoPlay[aria-pressed="true"] { background: var(--sky); }
+@media (max-width: 760px) {
+  .controls .nav-button { flex: 1; min-width: 0; }
+  .controls #next { flex: 1.35; }
+  .controls #autoPlay { white-space: nowrap; }
+}
 </style>
 </head>
 <body>
-<header class="site-header"><a class="brand" href="#inicio" aria-label="Início da revista"><img src="assets/logo-anita.png" alt=""><span>MARISTA ESCOLA SOCIAL<small>ANITA CORDEIRO · PAIÇANDU</small></span></a><span class="header-spacer"></span><div class="sound-controls" aria-label="Controles de som"><button class="sound-control" id="musicToggle" type="button" aria-pressed="false" aria-label="Ativar trilha sonora"><span class="control-icon" aria-hidden="true">♫</span><span class="control-label">Trilha sonora</span><small id="musicStatus">Toque para ouvir</small></button><button class="sound-control" id="flipToggle" type="button" aria-pressed="false" aria-label="Ativar som de virar página"><span class="control-icon" aria-hidden="true">▤</span><span class="control-label">Som da página</span><small id="flipStatus">Toque para ouvir</small></button></div><div class="controls"><button class="nav-button secondary" id="previous" type="button" aria-label="Página anterior">Voltar</button><button class="nav-button" id="next" type="button">Próxima página</button></div></header>
+<header class="site-header"><a class="brand" href="#inicio" aria-label="Início da revista"><img src="assets/logo-anita.png" alt=""><span>MARISTA ESCOLA SOCIAL<small>ANITA CORDEIRO · PAIÇANDU</small></span></a><span class="header-spacer"></span><div class="sound-controls" aria-label="Controles de som"><button class="sound-control" id="musicToggle" type="button" aria-pressed="false" aria-label="Ativar trilha sonora"><span class="control-icon" aria-hidden="true">♫</span><span class="control-label">Trilha sonora</span><small id="musicStatus">Toque para ouvir</small></button><button class="sound-control" id="flipToggle" type="button" aria-pressed="false" aria-label="Ativar som de virar página"><span class="control-icon" aria-hidden="true">▤</span><span class="control-label">Som da página</span><small id="flipStatus">Toque para ouvir</small></button></div><div class="controls"><button class="nav-button secondary" id="previous" type="button" aria-label="Página anterior">Voltar</button><button class="nav-button" id="next" type="button">Próxima página</button>
+<button class="nav-button secondary" id="autoPlay" type="button" aria-pressed="false" aria-label="Iniciar reprodução automática, 6 segundos por página">▶ Automático</button>
+</div></header>
 <main id="inicio"><section class="intro"><div class="eyebrow">Uma lembrança para guardar</div><h1>Nosso grande<br>começo!</h1><p>Uma revista para celebrar a formatura do Infantil 5 e cada sorriso que fez parte dessa aventura.</p></section>
 <section class="reader" aria-label="Revista digital"><div class="reader-toolbar"><span class="page-label" id="pageLabel">Capa</span><div class="progress" role="progressbar" aria-label="Progresso da revista" aria-valuemin="1" aria-valuemax="1" aria-valuenow="1"><span id="progressFill"></span></div><button class="index-toggle" id="indexToggle" type="button" aria-expanded="false" aria-controls="thumbnails">☷ <span>Miniaturas</span></button></div><div class="book-shell"><article class="page" id="page" aria-live="polite"></article><div class="thumbnails" id="thumbnails" aria-label="Índice de páginas"></div></div></section></main>
 <footer class="site-footer"><strong>Com carinho, Marista Escola Social Anita Cordeiro.</strong><br>Que cada sonho encontre espaço para crescer. ✦</footer>
@@ -50,8 +58,8 @@ function render(){const item=pages[current];pageEl.classList.remove('flip');void
  }else if(item.type==='quote'){pageEl.innerHTML=`<div class="quote-page"><div><div class="quote-mark" aria-hidden="true">“</div><h2>${item.title}</h2><p>${item.subtitle}</p><div class="quote-doodles" aria-hidden="true">✦　☼　✦</div></div></div>`;
  }else{const n=photoFiles.indexOf(item.src)+1;pageEl.innerHTML=`<div class="photo-wrap"><img class="page-photo" src="${item.src}" alt="Retrato de formatura do Infantil 5, foto ${String(n).padStart(2,'0')}" decoding="async"></div><div class="page-copy"><div class="copy-top">Infantil 5 · Formatura</div><h2>${item.title}</h2><span class="page-num">${String(current+1).padStart(2,'0')} / ${pages.length}</span></div>`;}
  label.textContent=item.type==='cover'?'Capa':item.type==='quote'?'Uma mensagem para você':`Foto ${String(photoFiles.indexOf(item.src)+1).padStart(2,'0')} de ${photoFiles.length}`;prev.disabled=current===0;next.disabled=false;next.textContent=current===pages.length-1?'Recomeçar':'Próxima página';next.setAttribute('aria-label',current===pages.length-1?'Recomeçar revista':'Próxima página');fill.style.width=`${((current+1)/pages.length)*100}%`;progress.setAttribute('aria-valuemax',pages.length);progress.setAttribute('aria-valuenow',current+1);document.querySelectorAll('.thumb').forEach((b,i)=>b.classList.toggle('active',i===current));}
-function go(n){if(n<0||n>=pages.length)return;current=n;pageSound();render();}prev.addEventListener('click',()=>go(current-1));next.addEventListener('click',()=>go(current===pages.length-1?0:current+1));document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(current+1);if(e.key==='ArrowLeft')go(current-1)});
-pages.forEach((p,i)=>{const b=document.createElement('button');b.className='thumb';b.type='button';b.setAttribute('aria-label',`Ir para ${p.type==='photo'?'foto '+String(photoFiles.indexOf(p.src)+1):p.type==='cover'?'capa':'mensagem'}, página ${i+1}`);b.innerHTML=p.type==='photo'?`<img loading="lazy" src="${p.src}" alt=""><span>Foto ${String(photoFiles.indexOf(p.src)+1).padStart(2,'0')}</span>`:`<span class="thumb-word">${p.type==='cover'?'Capa':'✦ Mensagem'}</span>`;b.addEventListener('click',()=>{thumbs.classList.remove('open');document.getElementById('indexToggle').setAttribute('aria-expanded','false');go(i);});thumbs.append(b);});document.getElementById('indexToggle').addEventListener('click',e=>{const on=thumbs.classList.toggle('open');e.currentTarget.setAttribute('aria-expanded',on);});
+function go(n){if(n<0||n>=pages.length)return;current=n;pageSound();render();scheduleAutomaticPage();}prev.addEventListener('click',()=>go(current-1));next.addEventListener('click',()=>go(current===pages.length-1?0:current+1));document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(current+1);if(e.key==='ArrowLeft')go(current-1)});
+pages.forEach((p,i)=>{const b=document.createElement('button');b.className='thumb';b.type='button';b.setAttribute('aria-label',`Ir para ${p.type==='photo'?'foto '+String(photoFiles.indexOf(p.src)+1):p.type==='cover'?'capa':'mensagem'}, página ${i+1}`);b.innerHTML=p.type==='photo'?`<img loading="lazy" src="${p.src}" alt=""><span>Foto ${String(photoFiles.indexOf(p.src)+1).padStart(2,'0')}</span>`:`<span class="thumb-word">${p.type==='cover'?'Capa':'✦ Mensagem'}</span>`;b.addEventListener('click',()=>{thumbs.classList.remove('open');document.getElementById('indexToggle').setAttribute('aria-expanded','false');go(i);});thumbs.append(b);});document.getElementById('indexToggle').addEventListener('click',e=>{const on=thumbs.classList.toggle('open');e.currentTarget.setAttribute('aria-expanded',on);scheduleAutomaticPage();});
 let ctx=null,musicTimer=null,musicOn=false,flipOn=false,step=0;
 function getAudio(){if(!ctx)ctx=new(window.AudioContext||window.webkitAudioContext)();return ctx;}
 function playTone(freq,duration,volume,type='triangle'){const c=getAudio(),o=c.createOscillator(),g=c.createGain(),now=c.currentTime;o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(.0001,now);g.gain.exponentialRampToValueAtTime(volume,now+.025);g.gain.exponentialRampToValueAtTime(.0001,now+duration);o.connect(g);g.connect(c.destination);o.start(now);o.stop(now+duration+.03);}
@@ -87,6 +95,38 @@ function cancelSwipe(event) {
 }
 pageEl.addEventListener('pointercancel', cancelSwipe);
 pageEl.addEventListener('lostpointercapture', cancelSwipe);
+
+const autoPlay = document.getElementById('autoPlay');
+const automaticPageDelay = 6000;
+let autoPlaying = false;
+let automaticPageTimer;
+
+function setAutoPlaying(active) {
+  autoPlaying = active;
+  autoPlay.setAttribute('aria-pressed', String(active));
+  autoPlay.textContent = active ? 'Ⅱ Pausar' : '▶ Automático';
+  autoPlay.setAttribute('aria-label', active
+    ? 'Pausar reprodução automática'
+    : 'Iniciar reprodução automática, 6 segundos por página');
+  scheduleAutomaticPage();
+}
+
+function scheduleAutomaticPage() {
+  clearTimeout(automaticPageTimer);
+  if (!autoPlaying) return;
+  if (current === pages.length - 1) {
+    setAutoPlaying(false);
+    return;
+  }
+  if (document.hidden || thumbs.classList.contains('open')) return;
+  automaticPageTimer = setTimeout(() => next.click(), automaticPageDelay);
+}
+
+autoPlay.addEventListener('click', () => {
+  if (!autoPlaying && current === pages.length - 1) next.click();
+  setAutoPlaying(!autoPlaying);
+});
+document.addEventListener('visibilitychange', scheduleAutomaticPage);
 
 render();
 </script></body></html>
